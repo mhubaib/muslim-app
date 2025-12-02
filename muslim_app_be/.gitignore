@@ -20,3 +20,5 @@
 .cursorrules
 /todo
 /generated/prisma
+
+/src/generated/prisma

@@ -1,6 +1,6 @@
 import admin from '../../config/firebase.js';
 import prisma from '../../config/database.js';
-import { NotificationType } from '../../prisma/default/client.js';
+import { NotificationType } from '../../generated/prisma/client.js';
 
 interface SendNotificationDto {
     type: NotificationType;

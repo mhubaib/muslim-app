@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { NotificationService } from './notification.service.js';
-import { NotificationType } from '../../prisma/default/client.js';
+import { NotificationType } from '../../generated/prisma/client.js';
 
 const notificationService = new NotificationService();
 
