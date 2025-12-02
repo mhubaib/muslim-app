@@ -1,11 +1,12 @@
 import { View, Text, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function PrayerTimeScreen() {
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <Text style={styles.title}>Jadwal Sholat</Text>
             <Text style={styles.subtitle}>Screen untuk menampilkan jadwal sholat</Text>
-        </View>
+        </SafeAreaView>
     );
 }
 

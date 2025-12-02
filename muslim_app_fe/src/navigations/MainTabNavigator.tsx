@@ -31,9 +31,8 @@ export default function MainTabNavigator() {
                 tabBarInactiveTintColor: 'gray',
                 headerShown: true,
                 tabBarStyle: {
-                    paddingBottom: 5,
                     paddingTop: 5,
-                    height: 60,
+                    height: 85,
                 },
             })}>
             <Tab.Screen
