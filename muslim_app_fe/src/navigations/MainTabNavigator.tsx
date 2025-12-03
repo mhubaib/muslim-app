@@ -1,39 +1,21 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Ionicons, { IoniconsIconName } from '@react-native-vector-icons/ionicons';
 
 import PrayerTimeScreen from '../screens/PrayerTime';
 import QiblaCompassScreen from '../screens/QiblaCompass';
 import CalendarScreen from '../screens/Calendar';
 import QuranScreen from '../screens/Quran';
+import BottomTab from '../components/BottomTab';
 
 const Tab = createBottomTabNavigator();
 
 export default function MainTabNavigator() {
     return (
         <Tab.Navigator
+            tabBar={(props) => <BottomTab {...props} />}
             screenOptions={({ route }) => ({
-                tabBarIcon: ({ focused, color, size }) => {
-                    let iconName: IoniconsIconName = 'time-outline';
-
-                    if (route.name === 'PrayerTime') {
-                        iconName = focused ? 'time' : 'time-outline';
-                    } else if (route.name === 'QiblaCompass') {
-                        iconName = focused ? 'compass' : 'compass-outline';
-                    } else if (route.name === 'Calendar') {
-                        iconName = focused ? 'calendar' : 'calendar-outline';
-                    } else if (route.name === 'Quran') {
-                        iconName = focused ? 'book' : 'book-outline';
-                    }
-
-                    return <Ionicons name={iconName} size={size} color={color} />;
-                },
                 tabBarActiveTintColor: '#2E7D32',
                 tabBarInactiveTintColor: 'gray',
                 headerShown: true,
-                tabBarStyle: {
-                    paddingTop: 5,
-                    height: 85,
-                },
             })}>
             <Tab.Screen
                 name="PrayerTime"
