@@ -18,13 +18,15 @@ export default function BottomTab({ state, navigation, descriptors }: BottomTabB
     const overlayPosition = useSharedValue(0);
 
     const tabWidth = width / state.routes.length;
+    const overlaySize = 50; 
+    const overlayOffset = (tabWidth - overlaySize) / 2; 
 
     useEffect(() => {
-        overlayPosition.value = withSpring(state.index * tabWidth, {
+        overlayPosition.value = withSpring(state.index * tabWidth + overlayOffset, {
             damping: 25,
-            stiffness: 100,
+            stiffness: 150,
         });
-    }, [state.index, tabWidth]);
+    }, [state.index, tabWidth, overlayOffset]);
 
     const overlayStyle = useAnimatedStyle(() => ({
         transform: [{ translateX: overlayPosition.value }]
@@ -45,7 +47,7 @@ export default function BottomTab({ state, navigation, descriptors }: BottomTabB
 
     return (
         <View style={styles.container}>
-            <Animated.View style={[styles.overlay, { width: tabWidth }, overlayStyle]} />
+            <Animated.View style={[styles.overlay, { width: overlaySize, height: overlaySize }, overlayStyle]} />
 
             {state.routes.map((route, index) => {
                 const { options } = descriptors[route.key];
@@ -170,11 +172,11 @@ const styles = StyleSheet.create({
     },
     overlay: {
         position: 'absolute',
-        height: '100%',
         backgroundColor: '#dbfaddff',
-        borderRadius: 0,
-        top: 0,
+        borderRadius: 25, 
+        top: 2, 
         left: 0,
+        zIndex: 0,
     },
     tabItem: {
         flex: 1,
