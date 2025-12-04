@@ -1,238 +1,303 @@
-import { Text, View, ScrollView, Pressable, ActivityIndicator, Dimensions } from "react-native";
-import { getTodayPrayerTimes } from "../../api/shalat";
-import { useEffect, useState } from "react";
-import { getCurrentLocation, requestLocationPermission } from "../../utils/getCoordinates";
-import { PrayerNotificationSettings, PrayerTimes } from "../../types/PrayerTimes";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { styles } from "./prayer-style";
-import Ionicons from "@react-native-vector-icons/ionicons";
-import Animated from "react-native-reanimated";
-import LinearGradient from "react-native-linear-gradient";
-import PrayerCard from "../../components/PrayerCard";
+import {
+  Text,
+  View,
+  ScrollView,
+  Pressable,
+  ActivityIndicator,
+} from 'react-native';
+import { getTodayPrayerTimes } from '../../api/shalat';
+import { useEffect, useState } from 'react';
+import {
+  getCurrentLocation,
+  requestLocationPermission,
+} from '../../utils/getCoordinates';
+import {
+  PrayerNotificationSettings,
+  PrayerTimes,
+} from '../../types/PrayerTimes';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { styles } from './prayer-style';
+import Ionicons from '@react-native-vector-icons/ionicons';
+import LinearGradient from 'react-native-linear-gradient';
+import PrayerCard from '../../components/PrayerCard';
+import { getLocationName } from '../../api/location';
 
 export default function PrayerTimeScreen() {
-    const [prayerTimes, setPrayerTimes] = useState<PrayerTimes | undefined>(undefined);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [location, setLocation] = useState<{ lat: number, lon: number, city?: string } | null>(null);
-    const [calculationMethod, setCalculationMethod] = useState<string>("MWL");
-    const [showSettings, setShowSettings] = useState(false);
-    const [notifications, setNotifications] = useState<PrayerNotificationSettings>({
-        fajr: true,
-        dhuhr: true,
-        asr: true,
-        maghrib: true,
-        isha: true,
+  const [prayerTimes, setPrayerTimes] = useState<PrayerTimes | undefined>(
+    undefined,
+  );
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [location, setLocation] = useState<{
+    lat: number;
+    lon: number;
+    city?: string;
+  } | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
+  const [notifications, setNotifications] =
+    useState<PrayerNotificationSettings>({
+      fajr: true,
+      dhuhr: true,
+      asr: true,
+      maghrib: true,
+      isha: true,
+    });
+  const [countdown, setCountdown] = useState<string>('00:00:00');
+
+  useEffect(() => {
+    initializeScreen();
+  }, []);
+
+  const initializeScreen = async () => {
+    await getLocation();
+  };
+
+  useEffect(() => {
+    if (location) {
+      getPrayerTimes();
+    }
+  }, [location]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      updateCountdown();
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [prayerTimes]);
+
+  const getLocation = async () => {
+    try {
+      setLoading(true);
+      const permission = await requestLocationPermission();
+      if (!permission) {
+        setError(
+          'Akses lokasi ditolak, silahkan aktifkan akses lokasi di pengaturan',
+        );
+        setLoading(false);
+        return;
+      }
+      const currentLocation = await getCurrentLocation();
+      const city = await getLocationName({
+        lat: currentLocation.latitude,
+        lon: currentLocation.longitude,
+      });
+      setLocation({
+        lat: currentLocation.latitude,
+        lon: currentLocation.longitude,
+        city: city.city,
+      });
+      setError(null);
+    } catch (err) {
+      setError('Gagal mendapatkan lokasi, silahkan coba lagi' + err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getPrayerTimes = async () => {
+    try {
+      setLoading(true);
+      const times = await getTodayPrayerTimes({
+        lat: location?.lat || 0,
+        lon: location?.lon || 0,
+      });
+      setPrayerTimes(times);
+      setError(null);
+    } catch (err) {
+      setError('Gagal mendapatkan waktu sholat, silahkan coba lagi' + err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateCountdown = () => {
+    if (!prayerTimes) return;
+
+    const { next } = getCurrentNextPrayer();
+    if (!next) return;
+
+    const now = new Date();
+    const [hours, minutes] = next.time.split(':').map(Number);
+
+    const nextPrayerTime = new Date();
+    nextPrayerTime.setHours(hours, minutes, 0, 0);
+
+    // If next prayer is Fajr and it's after midnight, add a day
+    if (next.key === 'fajr' && now.getHours() >= 12) {
+      nextPrayerTime.setDate(nextPrayerTime.getDate() + 1);
+    }
+
+    const diff = nextPrayerTime.getTime() - now.getTime();
+
+    if (diff < 0) {
+      setCountdown('00:00:00');
+      return;
+    }
+
+    const totalSeconds = Math.floor(diff / 1000);
+    const hoursLeft = Math.floor(totalSeconds / 3600);
+    const minutesLeft = Math.floor((totalSeconds % 3600) / 60);
+    const secondsLeft = totalSeconds % 60;
+
+    const formattedCountdown = `${String(hoursLeft).padStart(2, '0')}:${String(
+      minutesLeft,
+    ).padStart(2, '0')}:${String(secondsLeft).padStart(2, '0')}`;
+    setCountdown(formattedCountdown);
+  };
+
+  const getCurrentNextPrayer = () => {
+    if (!prayerTimes) return { current: null, next: null };
+
+    const now = new Date();
+    const currentTime = now.getHours() * 60 + now.getMinutes();
+
+    const prayers = [
+      { name: 'Fajr', time: prayerTimes.fajr, key: 'fajr' },
+      { name: 'Dhuhr', time: prayerTimes.dhuhr, key: 'dhuhr' },
+      { name: 'Asr', time: prayerTimes.asr, key: 'asr' },
+      { name: 'Maghrib', time: prayerTimes.maghrib, key: 'maghrib' },
+      { name: 'Isha', time: prayerTimes.isha, key: 'isha' },
+    ];
+
+    const prayerMinutes = prayers.map(p => {
+      const [hours, minutes] = p.time.split(':').map(Number);
+      return { ...p, minutes: hours * 60 + minutes };
     });
 
-    useEffect(() => {
-        initializeScreen();
-    }, []);
+    let next = null;
 
-    const initializeScreen = async () => {
-        await getLocation();
-    };
+    for (let i = 0; i < prayerMinutes.length; i++) {
+      if (currentTime >= prayerMinutes[i].minutes) {
+        next = prayerMinutes[i + 1] || prayerMinutes[0];
+      }
+    }
 
-    useEffect(() => {
-        if (location) {
-            getPrayerTimes();
-        }
-    }, [location]);
+    return { next };
+  };
 
-    const getLocation = async () => {
-        try {
-            setLoading(true);
-            const permission = await requestLocationPermission();
-            if (!permission) {
-                setError('Akses lokasi ditolak, silahkan aktifkan akses lokasi di pengaturan');
-                setLoading(false);
-                return;
-            }
-            const currentLocation = await getCurrentLocation();
-            setLocation({
-                lat: currentLocation.latitude,
-                lon: currentLocation.longitude,
-                city: "Jakarta"
-            });
-            setError(null);
-        } catch (error) {
-            setError('Gagal mendapatkan lokasi, silahkan coba lagi');
-        } finally {
-            setLoading(false);
-        }
-    };
+  const toggleNotification = (prayer: keyof PrayerNotificationSettings) => {
+    setNotifications(prev => ({
+      ...prev,
+      [prayer]: !prev[prayer],
+    }));
+  };
 
-    const getPrayerTimes = async () => {
-        try {
-            setLoading(true);
-            const times = await getTodayPrayerTimes({ lat: location?.lat || 0, lon: location?.lon || 0 });
-            setPrayerTimes(times);
-            setError(null);
-        } catch (error) {
-            setError('Gagal mendapatkan waktu sholat, silahkan coba lagi');
-        } finally {
-            setLoading(false);
-        }
-    };
+  const { next } = getCurrentNextPrayer();
 
-    const getCurrentNextPrayer = () => {
-        if (!prayerTimes) return { current: null, next: null };
+  return (
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+      <View style={styles.innerContainer}>
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.headerTitle}>Waktu Sholat</Text>
+            <Text style={styles.headerSubtitle}>
+              {loading ? 'Memuat lokasi...' : location?.city}
+            </Text>
+          </View>
+          <View style={styles.headerButton}>
+            <Pressable style={styles.settingsButton} onPress={getLocation}>
+              <Ionicons name={'location-outline'} size={24} color="#FFFFFF" />
+            </Pressable>
+            <Pressable
+              style={styles.settingsButton}
+              onPress={() => setShowSettings(!showSettings)}
+            >
+              <Ionicons
+                name={showSettings ? 'close' : 'settings-outline'}
+                size={24}
+                color="#FFFFFF"
+              />
+            </Pressable>
+          </View>
+        </View>
 
-        const now = new Date();
-        const currentTime = now.getHours() * 60 + now.getMinutes();
-        console.log(currentTime);
-
-        const prayers = [
-            { name: 'Fajr', time: prayerTimes.fajr, key: 'fajr' },
-            { name: 'Dhuhr', time: prayerTimes.dhuhr, key: 'dhuhr' },
-            { name: 'Asr', time: prayerTimes.asr, key: 'asr' },
-            { name: 'Maghrib', time: prayerTimes.maghrib, key: 'maghrib' },
-            { name: 'Isha', time: prayerTimes.isha, key: 'isha' },
-        ];
-
-        const prayerMinutes = prayers.map(p => {
-            const [hours, minutes] = p.time.split(':').map(Number);
-            return { ...p, minutes: hours * 60 + minutes };
-        });
-
-        let current = null;
-        let next = null;
-
-        for (let i = 0; i < prayerMinutes.length; i++) {
-            if (currentTime >= prayerMinutes[i].minutes) {
-                current = prayerMinutes[i];
-                next = prayerMinutes[i + 1] || prayerMinutes[0];
-            }
-        }
-
-        if (!current) {
-            current = prayerMinutes[prayerMinutes.length - 1];
-            next = prayerMinutes[0];
-        }
-
-        return { current, next };
-    };
-
-    const toggleNotification = (prayer: keyof PrayerNotificationSettings) => {
-        setNotifications(prev => ({
-            ...prev,
-            [prayer]: !prev[prayer]
-        }));
-    };
-
-    const { current, next } = getCurrentNextPrayer();
-
-    return (
-        <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-            <View style={styles.innerContainer}>
-                <View style={styles.header}>
-                    <View>
-                        <Text style={styles.headerTitle}>Waktu Sholat</Text>
-                        <Text style={styles.headerSubtitle}>
-                            {location?.city || 'Memuat lokasi...'}
-                        </Text>
-                    </View>
-                    <Pressable
-                        style={styles.settingsButton}
-                        onPress={() => setShowSettings(!showSettings)}
-                    >
-                        <Ionicons
-                            name={showSettings ? "close" : "settings-outline"}
-                            size={24}
-                            color="#FFFFFF"
-                        />
-                    </Pressable>
-                </View>
-
-                <View style={styles.currentTimeCard}>
-                    <LinearGradient
-                        colors={['rgba(255,255,255,0.25)', 'rgba(255,255,255,0.15)']}
-                        style={styles.currentTimeGradient}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}
-                    >
-                        <View style={styles.currentTimeContent}>
-                            <Text style={styles.currentTimeLabel}>Sholat Berikutnya</Text>
-                            <Text style={styles.currentTimeName}>
-                                {next?.name || 'Fajr'}
-                            </Text>
-                            <Text style={styles.currentTimeSubtext}>
-                                Sholat {current?.name || 'Isha'} telah berlalu
-                            </Text>
-                        </View>
-                        <Text style={styles.currentTime}>
-                            {next?.time ? next?.time + ` ${next?.time as any < 12 ? 'AM' : 'PM'}` : '00:00'}
-                        </Text>
-                    </LinearGradient>
-                </View>
-
-                <ScrollView
-                    style={styles.scrollView}
-                    showsVerticalScrollIndicator={false}
-                    contentContainerStyle={styles.contentContainer}
-                >
-
-                    {loading ? (
-                        <View style={styles.loadingContainer}>
-                            <ActivityIndicator size="large" color="#FFFFFF" />
-                            <Text style={styles.loadingText}>Memuat waktu sholat...</Text>
-                        </View>
-                    ) : error ? (
-                        <View style={styles.errorContainer}>
-                            <Ionicons name="alert-circle-outline" size={48} color="#FFCDD2" />
-                            <Text style={styles.errorText}>{error}</Text>
-                            <Pressable style={styles.retryButton} onPress={initializeScreen}>
-                                <Text style={styles.retryButtonText}>Coba Lagi</Text>
-                            </Pressable>
-                        </View>
-                    ) : prayerTimes ? (
-                        <>
-                            <PrayerCard
-                                name="Fajr"
-                                time={prayerTimes.fajr}
-                                icon="sunny"
-                                isNext={next?.key === 'fajr'}
-                                notificationEnabled={notifications.fajr}
-                                onToggleNotification={() => toggleNotification('fajr')}
-                            />
-                            <PrayerCard
-                                name="Dhuhr"
-                                time={prayerTimes.dhuhr}
-                                icon="partly-sunny"
-                                isNext={next?.key === 'dhuhr'}
-                                notificationEnabled={notifications.dhuhr}
-                                onToggleNotification={() => toggleNotification('dhuhr')}
-                            />
-                            <PrayerCard
-                                name="Asr"
-                                time={prayerTimes.asr}
-                                icon="cloudy"
-                                isNext={next?.key === 'asr'}
-                                notificationEnabled={notifications.asr}
-                                onToggleNotification={() => toggleNotification('asr')}
-                            />
-                            <PrayerCard
-                                name="Maghrib"
-                                time={prayerTimes.maghrib}
-                                icon="moon"
-                                isNext={next?.key === 'maghrib'}
-                                notificationEnabled={notifications.maghrib}
-                                onToggleNotification={() => toggleNotification('maghrib')}
-                            />
-                            <PrayerCard
-                                name="Isha"
-                                time={prayerTimes.isha}
-                                icon="star"
-                                isNext={next?.key === 'isha'}
-                                notificationEnabled={notifications.isha}
-                                onToggleNotification={() => toggleNotification('isha')}
-                            />
-                        </>
-                    ) : null}
-
-                    <View style={styles.bottomPadding} />
-                </ScrollView>
+        <View style={styles.currentTimeCard}>
+          <LinearGradient
+            colors={['rgba(255,255,255,0.25)', 'rgba(255,255,255,0.15)']}
+            style={styles.currentTimeGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <View style={styles.currentTimeContent}>
+              <Text style={styles.currentTimeLabel}>Sholat Berikutnya</Text>
+              <Text style={styles.currentTimeName}>{next?.name || 'Fajr'}</Text>
+              <Text style={styles.currentTimeSubtext}>{countdown}</Text>
             </View>
-        </SafeAreaView>
-    );
+            <Text style={styles.currentTime}>
+              {next?.time
+                ? next?.time + ` ${(next?.time as any) < 12 ? 'AM' : 'PM'}`
+                : '00:00'}
+            </Text>
+          </LinearGradient>
+        </View>
+
+        <ScrollView
+          style={styles.scrollView}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.contentContainer}
+        >
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#FFFFFF" />
+              <Text style={styles.loadingText}>Memuat waktu sholat...</Text>
+            </View>
+          ) : error ? (
+            <View style={styles.errorContainer}>
+              <Ionicons name="alert-circle-outline" size={48} color="#FFCDD2" />
+              <Text style={styles.errorText}>{error}</Text>
+              <Pressable style={styles.retryButton} onPress={initializeScreen}>
+                <Text style={styles.retryButtonText}>Coba Lagi</Text>
+              </Pressable>
+            </View>
+          ) : prayerTimes ? (
+            <>
+              <PrayerCard
+                name="Fajr"
+                time={prayerTimes.fajr}
+                icon="sunny"
+                isNext={next?.key === 'fajr'}
+                notificationEnabled={notifications.fajr}
+                onToggleNotification={() => toggleNotification('fajr')}
+              />
+              <PrayerCard
+                name="Dhuhr"
+                time={prayerTimes.dhuhr}
+                icon="partly-sunny"
+                isNext={next?.key === 'dhuhr'}
+                notificationEnabled={notifications.dhuhr}
+                onToggleNotification={() => toggleNotification('dhuhr')}
+              />
+              <PrayerCard
+                name="Asr"
+                time={prayerTimes.asr}
+                icon="cloudy"
+                isNext={next?.key === 'asr'}
+                notificationEnabled={notifications.asr}
+                onToggleNotification={() => toggleNotification('asr')}
+              />
+              <PrayerCard
+                name="Maghrib"
+                time={prayerTimes.maghrib}
+                icon="moon"
+                isNext={next?.key === 'maghrib'}
+                notificationEnabled={notifications.maghrib}
+                onToggleNotification={() => toggleNotification('maghrib')}
+              />
+              <PrayerCard
+                name="Isha"
+                time={prayerTimes.isha}
+                icon="star"
+                isNext={next?.key === 'isha'}
+                notificationEnabled={notifications.isha}
+                onToggleNotification={() => toggleNotification('isha')}
+              />
+            </>
+          ) : null}
+
+          <View style={styles.bottomPadding} />
+        </ScrollView>
+      </View>
+    </SafeAreaView>
+  );
 }

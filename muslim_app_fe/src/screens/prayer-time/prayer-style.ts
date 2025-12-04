@@ -1,6 +1,4 @@
-import { StyleSheet, Dimensions } from "react-native";
-
-const { width } = Dimensions.get('window');
+import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
     container: {
@@ -18,6 +16,10 @@ export const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: 12,
         paddingVertical: 16,
+    },
+    headerButton: {
+        flexDirection: 'row',
+        gap: 8,
     },
     headerTitle: {
         fontSize: 28,
@@ -78,9 +80,10 @@ export const styles = StyleSheet.create({
         gap: 10,
     },
     currentTimeSubtext: {
-        fontSize: 14,
+        fontSize: 16,
         color: 'rgba(255,255,255,0.8)',
         fontWeight: '500',
+        letterSpacing: 1,
     },
 
     // Settings Panel
