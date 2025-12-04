@@ -160,7 +160,7 @@ export default function PrayerTimeScreen() {
                             </Text>
                         </View>
                         <Text style={styles.currentTime}>
-                            {next?.time + ` ${next?.time as any < 12 ? 'AM' : 'PM'}` || '--:--'}
+                            {next?.time ? next?.time + ` ${next?.time as any < 12 ? 'AM' : 'PM'}` : '00:00'}
                         </Text>
                     </LinearGradient>
                 </View>
