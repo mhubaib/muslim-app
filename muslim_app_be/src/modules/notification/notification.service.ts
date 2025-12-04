@@ -3,130 +3,130 @@ import prisma from '../../config/database.js';
 import { NotificationType } from '../../generated/prisma/client.js';
 
 interface SendNotificationDto {
-    type: NotificationType;
-    title: string;
-    body: string;
-    meta?: Record<string, any>;
+  type: NotificationType;
+  title: string;
+  body: string;
+  meta?: Record<string, any>;
 }
 
 interface ScheduleNotificationDto extends SendNotificationDto {
-    scheduleAt: Date;
+  scheduleAt: Date;
 }
 
 export class NotificationService {
-    async sendToTopic(data: SendNotificationDto) {
-        try {
-            const message = {
-                notification: {
-                    title: data.title,
-                    body: data.body,
-                },
-                data: data.meta || {},
-                topic: data.type,
-            };
+  async sendToTopic(data: SendNotificationDto) {
+    try {
+      const message = {
+        notification: {
+          title: data.title,
+          body: data.body,
+        },
+        data: data.meta || {},
+        topic: data.type,
+      };
 
-            const response = await admin.messaging().send(message);
-            console.log('Successfully sent message to topic:', data.type, response);
+      const response = await admin.messaging().send(message);
+      console.log('Successfully sent message to topic:', data.type, response);
 
-            return {
-                success: true,
-                messageId: response,
-            };
-        } catch (error) {
-            console.error('Error sending notification:', error);
-            throw error;
-        }
+      return {
+        success: true,
+        messageId: response,
+      };
+    } catch (error) {
+      console.error('Error sending notification:', error);
+      throw error;
     }
+  }
 
-    async scheduleNotification(data: ScheduleNotificationDto) {
-        try {
-            const notification = await prisma.notificationSchedule.create({
-                data: {
-                    type: data.type,
-                    title: data.title,
-                    body: data.body,
-                    scheduleAt: data.scheduleAt,
-                    meta: data.meta || {},
-                },
-            });
+  async scheduleNotification(data: ScheduleNotificationDto) {
+    try {
+      const notification = await prisma.notificationSchedule.create({
+        data: {
+          type: data.type,
+          title: data.title,
+          body: data.body,
+          scheduleAt: data.scheduleAt,
+          meta: data.meta || {},
+        },
+      });
 
-            console.log('Notification scheduled:', notification.id);
-            return notification;
-        } catch (error) {
-            console.error('Error scheduling notification:', error);
-            throw error;
-        }
+      console.log('Notification scheduled:', notification.id);
+      return notification;
+    } catch (error) {
+      console.error('Error scheduling notification:', error);
+      throw error;
     }
+  }
 
-    async getScheduledNotifications() {
-        try {
-            const notifications = await prisma.notificationSchedule.findMany({
-                where: {
-                    scheduleAt: {
-                        gte: new Date(),
-                    },
-                },
-                orderBy: { scheduleAt: 'asc' },
-            });
+  async getScheduledNotifications() {
+    try {
+      const notifications = await prisma.notificationSchedule.findMany({
+        where: {
+          scheduleAt: {
+            gte: new Date(),
+          },
+        },
+        orderBy: { scheduleAt: 'asc' },
+      });
 
-            return notifications;
-        } catch (error) {
-            console.error('Error fetching scheduled notifications:', error);
-            throw error;
-        }
+      return notifications;
+    } catch (error) {
+      console.error('Error fetching scheduled notifications:', error);
+      throw error;
     }
+  }
 
-    async processPendingNotifications() {
+  async processPendingNotifications() {
+    try {
+      const now = new Date();
+      const pendingNotifications = await prisma.notificationSchedule.findMany({
+        where: {
+          scheduleAt: {
+            lte: now,
+          },
+        },
+      });
+
+      console.log(`Processing ${pendingNotifications.length} pending notifications`);
+
+      for (const notification of pendingNotifications) {
         try {
-            const now = new Date();
-            const pendingNotifications = await prisma.notificationSchedule.findMany({
-                where: {
-                    scheduleAt: {
-                        lte: now,
-                    },
-                },
-            });
+          await this.sendToTopic({
+            type: notification.type,
+            title: notification.title,
+            body: notification.body,
+            meta: notification.meta as Record<string, any>,
+          });
 
-            console.log(`Processing ${pendingNotifications.length} pending notifications`);
+          // Delete after sending
+          await prisma.notificationSchedule.delete({
+            where: { id: notification.id },
+          });
 
-            for (const notification of pendingNotifications) {
-                try {
-                    await this.sendToTopic({
-                        type: notification.type,
-                        title: notification.title,
-                        body: notification.body,
-                        meta: notification.meta as Record<string, any>,
-                    });
-
-                    // Delete after sending
-                    await prisma.notificationSchedule.delete({
-                        where: { id: notification.id },
-                    });
-
-                    console.log(`Sent and deleted notification ${notification.id}`);
-                } catch (error) {
-                    console.error(`Failed to send notification ${notification.id}:`, error);
-                }
-            }
-
-            return pendingNotifications.length;
+          console.log(`Sent and deleted notification ${notification.id}`);
         } catch (error) {
-            console.error('Error processing pending notifications:', error);
-            throw error;
+          console.error(`Failed to send notification ${notification.id}:`, error);
         }
-    }
+      }
 
-    async deleteScheduledNotification(id: number) {
-        try {
-            await prisma.notificationSchedule.delete({
-                where: { id },
-            });
-
-            console.log('Scheduled notification deleted:', id);
-            return { success: true };
-        } catch (error) {
-            console.error('Error deleting scheduled notification:', error);
-            throw error;
-        }
+      return pendingNotifications.length;
+    } catch (error) {
+      console.error('Error processing pending notifications:', error);
+      throw error;
     }
+  }
+
+  async deleteScheduledNotification(id: number) {
+    try {
+      await prisma.notificationSchedule.delete({
+        where: { id },
+      });
+
+      console.log('Scheduled notification deleted:', id);
+      return { success: true };
+    } catch (error) {
+      console.error('Error deleting scheduled notification:', error);
+      throw error;
+    }
+  }
 }

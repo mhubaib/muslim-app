@@ -1,7 +1,7 @@
 import { Text, View, ScrollView, Pressable, ActivityIndicator, Dimensions } from "react-native";
 import { getTodayPrayerTimes } from "../../api/shalat";
 import { useEffect, useState } from "react";
-import { getCurrentLocation, requestLocationPermission } from "../../utils/getLocation";
+import { getCurrentLocation, requestLocationPermission } from "../../utils/getCoordinates";
 import { PrayerNotificationSettings, PrayerTimes } from "../../types/PrayerTimes";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { styles } from "./prayer-style";
@@ -80,6 +80,7 @@ export default function PrayerTimeScreen() {
 
         const now = new Date();
         const currentTime = now.getHours() * 60 + now.getMinutes();
+        console.log(currentTime);
 
         const prayers = [
             { name: 'Fajr', time: prayerTimes.fajr, key: 'fajr' },

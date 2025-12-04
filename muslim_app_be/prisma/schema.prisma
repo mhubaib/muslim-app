@@ -77,3 +77,22 @@ model Ayah {
 
   @@index([surahId])
 }
+
+model LocationCache {
+  id          Int      @id @default(autoincrement())
+  lat         Float
+  lon         Float
+  address     String
+  city        String?
+  state       String?
+  country     String?
+  countryCode String?
+  postalCode  String?
+  displayName String
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([lat, lon])
+  @@index([lat, lon])
+}

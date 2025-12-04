@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
-import { PrayerService } from './prayer.service.js';
+import { LocationService } from './location.service.js';
 
-const prayerService = new PrayerService();
+const locationService = new LocationService();
 
-export const getTodayPrayerTimes = async (req: Request, res: Response) => {
+export const reverseGeocode = async (req: Request, res: Response) => {
   try {
     const { lat, lon } = req.query;
 
@@ -38,16 +38,37 @@ export const getTodayPrayerTimes = async (req: Request, res: Response) => {
       });
     }
 
-    const prayerTimes = await prayerService.getTodayPrayerTimes(latitude, longitude);
+    const locationData = await locationService.reverseGeocode(latitude, longitude);
 
-    res.status(201).json({
+    res.status(200).json({
       success: true,
-      data: prayerTimes,
+      data: locationData,
     });
   } catch (error) {
+    console.error('Error in reverse geocoding:', error);
+
+    // Handle specific LocationIQ API errors
+    if (error instanceof Error) {
+      if (error.message.includes('401') || error.message.includes('Unauthorized')) {
+        return res.status(500).json({
+          success: false,
+          message: 'Invalid LocationIQ API key',
+          error: 'API authentication failed',
+        });
+      }
+
+      if (error.message.includes('429') || error.message.includes('rate limit')) {
+        return res.status(429).json({
+          success: false,
+          message: 'Rate limit exceeded',
+          error: 'Too many requests to LocationIQ API',
+        });
+      }
+    }
+
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch prayer times',
+      message: 'Failed to fetch location data',
       error: error instanceof Error ? error.message : 'Unknown error',
     });
   }

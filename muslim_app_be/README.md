@@ -14,7 +14,7 @@ Backend API untuk aplikasi Muslim App menggunakan **Express.js**, **Prisma**, **
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - PostgreSQL database
 - Firebase project dengan FCM enabled
 
@@ -82,9 +82,11 @@ Tidak ada autentikasi user. API key digunakan untuk validasi bahwa request beras
 ### Health Check
 
 #### `GET /`
+
 Status API
 
 #### `GET /health`
+
 Health check endpoint
 
 ---
@@ -92,9 +94,11 @@ Health check endpoint
 ### Quran API
 
 #### `GET /quran/surah`
+
 Mengambil semua surah (114 surah)
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -111,12 +115,15 @@ Mengambil semua surah (114 surah)
 ```
 
 #### `GET /quran/surah/:id`
+
 Mengambil surah tertentu dengan semua ayat
 
 **Parameters:**
+
 - `id` (1-114) - Nomor surah
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -141,9 +148,11 @@ Mengambil surah tertentu dengan semua ayat
 ```
 
 #### `GET /quran/ayah/:surahId/:ayahNumber`
+
 Mengambil ayat tertentu
 
 **Parameters:**
+
 - `surahId` - Nomor surah
 - `ayahNumber` - Nomor ayat dalam surah
 
@@ -152,14 +161,17 @@ Mengambil ayat tertentu
 ### Prayer Times API
 
 #### `GET /prayer/today?lat=...&lon=...`
+
 Mengambil jadwal sholat hari ini
 
 **Query Parameters:**
+
 - `lat` - Latitude (-90 to 90)
 - `lon` - Longitude (-180 to 180)
 
 **Response:**
-```json
+
+````json
 {
   "success": true,
   "data": {
@@ -167,23 +179,6 @@ Mengambil jadwal sholat hari ini
     "fajr": "04:32",
     "dhuhr": "11:52",
     "asr": "15:15",
-    "maghrib": "17:51",
-    "isha": "19:03"
-  }
-}
-```
-
-**Caching Strategy:**
-- Data di-cache per hari
-- Jika cache ada → return dari database
-- Jika tidak ada → fetch dari API eksternal → simpan → return
-
----
-
-### Islamic Events API
-
-#### `GET /events`
-Mengambil semua event Islam
 
 #### `GET /events/upcoming`
 Mengambil event yang akan datang
@@ -202,12 +197,14 @@ Membuat event baru
   "dateHijri": "27 Rajab 1446",
   "estimatedGregorian": "2025-01-27"
 }
-```
+````
 
 #### `PUT /events/:id`
+
 Update event
 
 #### `DELETE /events/:id`
+
 Hapus event
 
 ---
@@ -215,9 +212,11 @@ Hapus event
 ### Push Notification API
 
 #### `POST /notification/send`
+
 Kirim notifikasi langsung ke topic
 
 **Request Body:**
+
 ```json
 {
   "type": "AZAN",
@@ -230,14 +229,17 @@ Kirim notifikasi langsung ke topic
 ```
 
 **Notification Types:**
+
 - `AZAN` - Notifikasi adzan
 - `EVENT_ISLAMIC` - Notifikasi event Islam
 - `CUSTOM` - Notifikasi custom
 
 #### `POST /notification/schedule`
+
 Jadwalkan notifikasi untuk waktu tertentu
 
 **Request Body:**
+
 ```json
 {
   "type": "AZAN",
@@ -249,9 +251,11 @@ Jadwalkan notifikasi untuk waktu tertentu
 ```
 
 #### `GET /notification/scheduled`
+
 Lihat semua notifikasi yang dijadwalkan
 
 #### `DELETE /notification/scheduled/:id`
+
 Hapus notifikasi terjadwal
 
 ---
@@ -279,7 +283,7 @@ Server mengirim notifikasi ke topic menggunakan Firebase Admin SDK:
 admin.messaging().send({
   notification: { title, body },
   data: meta,
-  topic: type
+  topic: type,
 });
 ```
 
@@ -308,10 +312,12 @@ admin.messaging().send({
 ## ⏰ Scheduled Jobs (Cron)
 
 ### Daily Cache Cleanup
+
 **Schedule:** Setiap hari jam 00:00  
 **Function:** Hapus cache jadwal sholat yang sudah lewat
 
 ### Notification Processing
+
 **Schedule:** Setiap menit  
 **Function:** Proses dan kirim notifikasi yang sudah waktunya
 
@@ -365,23 +371,33 @@ npm run format:check     # Check code formatting
 ## 🗄️ Database Schema
 
 ### PrayerCache
+
 Cache jadwal sholat harian
+
 - `id`, `date`, `fajr`, `dhuhr`, `asr`, `maghrib`, `isha`
 
 ### NotificationSchedule
+
 Notifikasi yang dijadwalkan
+
 - `id`, `type`, `title`, `body`, `scheduleAt`, `meta`
 
 ### IslamicEvent
+
 Event-event Islam
+
 - `id`, `name`, `description`, `dateHijri`, `estimatedGregorian`
 
 ### Surah
+
 Surah Al-Quran
+
 - `id`, `name`, `englishName`, `numberOfAyahs`, `revelationType`
 
 ### Ayah
+
 Ayat Al-Quran
+
 - `id`, `ayahNumber`, `surahId`, `textArabic`, `textLatin`, `textTranslation`
 
 ---
@@ -393,8 +409,7 @@ Tidak menggunakan backend. Perhitungan dilakukan di client menggunakan formula:
 ```javascript
 const bearing = Math.atan2(
   Math.sin(deltaLongitude),
-  Math.cos(userLat) * Math.tan(kaabaLat) - 
-  Math.sin(userLat) * Math.cos(deltaLongitude)
+  Math.cos(userLat) * Math.tan(kaabaLat) - Math.sin(userLat) * Math.cos(deltaLongitude)
 );
 ```
 
@@ -407,6 +422,7 @@ Koordinat Ka'bah: `21.4225° N, 39.8262° E`
 Semua endpoint mengembalikan response dalam format:
 
 **Success:**
+
 ```json
 {
   "success": true,
@@ -415,6 +431,7 @@ Semua endpoint mengembalikan response dalam format:
 ```
 
 **Error:**
+
 ```json
 {
   "success": false,
@@ -424,6 +441,7 @@ Semua endpoint mengembalikan response dalam format:
 ```
 
 **HTTP Status Codes:**
+
 - `200` - Success
 - `201` - Created
 - `400` - Bad Request (validation error)
@@ -436,6 +454,7 @@ Semua endpoint mengembalikan response dalam format:
 ## 📝 Version History
 
 ### v1.0.0 (Current)
+
 - ✅ Quran caching system
 - ✅ Prayer times caching
 - ✅ Islamic events CRUD
