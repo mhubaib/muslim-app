@@ -42,7 +42,7 @@ export default function PrayerCard({ name, time, icon, isNext, notificationEnabl
     return (
         <Animated.View style={[styles.prayerCard, isNext && styles.prayerCardNext, cardAnimatedStyle]}>
             <View style={styles.prayerCardLeft}>
-                <Ionicons name={icon as any} size={28} color="#FFFFFF" />
+                <Ionicons name={icon as any} size={24} color="#FFFFFF" />
                 <View style={styles.prayerInfo}>
                     <Text style={[styles.prayerName, isNext && styles.prayerNameNext]}>{name}</Text>
                     <Text style={[styles.prayerTime, isNext && styles.prayerTimeNext]}>{time}</Text>
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     prayerCard: {
         backgroundColor: '#20493bff',
         borderRadius: 20,
-        padding: 18,
+        padding: 16,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',

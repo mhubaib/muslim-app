@@ -170,55 +170,6 @@ export default function PrayerTimeScreen() {
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={styles.contentContainer}
                 >
-                    {showSettings && (
-                        <Animated.View style={styles.settingsPanel}>
-                            <View style={styles.settingsPanelContent}>
-                                <Text style={styles.settingsPanelTitle}>Pengaturan</Text>
-
-                                <View style={styles.settingItem}>
-                                    <View style={styles.settingItemHeader}>
-                                        <Ionicons name="location-outline" size={20} color="#2E7D32" />
-                                        <Text style={styles.settingItemTitle}>Lokasi</Text>
-                                    </View>
-                                    <Pressable
-                                        style={styles.settingButton}
-                                        onPress={getLocation}
-                                    >
-                                        <Text style={styles.settingButtonText}>
-                                            {location ? `${location.lat.toFixed(4)}, ${location.lon.toFixed(4)}` : 'Dapatkan Lokasi'}
-                                        </Text>
-                                        <Ionicons name="chevron-forward" size={20} color="#666" />
-                                    </Pressable>
-                                </View>
-
-                                <View style={styles.settingItem}>
-                                    <View style={styles.settingItemHeader}>
-                                        <Ionicons name="calculator-outline" size={20} color="#2E7D32" />
-                                        <Text style={styles.settingItemTitle}>Metode Perhitungan</Text>
-                                    </View>
-                                    <View style={styles.calculationMethods}>
-                                        {['MWL', 'ISNA', 'Egypt', 'Makkah', 'Karachi'].map((method) => (
-                                            <Pressable
-                                                key={method}
-                                                style={[
-                                                    styles.methodChip,
-                                                    calculationMethod === method && styles.methodChipActive
-                                                ]}
-                                                onPress={() => setCalculationMethod(method)}
-                                            >
-                                                <Text style={[
-                                                    styles.methodChipText,
-                                                    calculationMethod === method && styles.methodChipTextActive
-                                                ]}>
-                                                    {method}
-                                                </Text>
-                                            </Pressable>
-                                        ))}
-                                    </View>
-                                </View>
-                            </View>
-                        </Animated.View>
-                    )}
 
                     {loading ? (
                         <View style={styles.loadingContainer}>
