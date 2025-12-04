@@ -11,15 +11,18 @@ import Animated, {
     Easing
 } from "react-native-reanimated";
 import { useEffect } from "react";
+import LinearGradient from "react-native-linear-gradient";
 
 const { width } = Dimensions.get('window');
+
+const OverlayAnimation = Animated.createAnimatedComponent(LinearGradient)
 
 export default function BottomTab({ state, navigation, descriptors }: BottomTabBarProps) {
     const overlayPosition = useSharedValue(0);
 
     const tabWidth = width / state.routes.length;
-    const overlaySize = 50; 
-    const overlayOffset = (tabWidth - overlaySize) / 2; 
+    const overlaySize = 50;
+    const overlayOffset = (tabWidth - overlaySize) / 2;
 
     useEffect(() => {
         overlayPosition.value = withSpring(state.index * tabWidth + overlayOffset, {
@@ -47,7 +50,12 @@ export default function BottomTab({ state, navigation, descriptors }: BottomTabB
 
     return (
         <View style={styles.container}>
-            <Animated.View style={[styles.overlay, { width: overlaySize, height: overlaySize }, overlayStyle]} />
+            <OverlayAnimation
+                colors={['rgba(255,255,255,0.25)', 'rgba(255,255,255,0.15)']}
+                style={[styles.overlay, { width: overlaySize, height: overlaySize }, overlayStyle]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+            />
 
             {state.routes.map((route, index) => {
                 const { options } = descriptors[route.key];
@@ -144,11 +152,11 @@ function TabItem({ route, index, isFocused, iconName, label, navigation, tabWidt
                 <AnimatedIcon
                     name={iconName}
                     size={26}
-                    color={isFocused ? '#2E7D32' : '#757575'}
+                    color={isFocused ? '#14be86' : '#dbd8d8ff'}
                     style={animatedIconStyle}
                 />
             </View>
-            <Text style={[styles.label, { color: isFocused ? '#2E7D32' : '#757575' }]} numberOfLines={1}>
+            <Text style={[styles.label, { color: isFocused ? '#14be86' : '#dbd8d8ff' }]} numberOfLines={1}>
                 {label}
             </Text>
         </Pressable>
@@ -164,17 +172,14 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-around',
         alignItems: 'center',
-        backgroundColor: '#FFFFFF',
-        height: 80,
-        borderTopWidth: 1,
-        borderTopColor: '#E0E0E0',
+        backgroundColor: '#20493bff',
+        height: 85,
         elevation: 8,
     },
     overlay: {
         position: 'absolute',
-        backgroundColor: '#dbfaddff',
-        borderRadius: 25, 
-        top: 2, 
+        borderRadius: 25,
+        top: 6,
         left: 0,
         zIndex: 0,
     },

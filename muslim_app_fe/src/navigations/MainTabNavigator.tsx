@@ -1,6 +1,6 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
-import PrayerTimeScreen from '../screens/PrayerTime';
+import PrayerTimeScreen from '../screens/prayer-time/PrayerTime';
 import QiblaCompassScreen from '../screens/QiblaCompass';
 import CalendarScreen from '../screens/Calendar';
 import QuranScreen from '../screens/Quran';
@@ -15,38 +15,34 @@ export default function MainTabNavigator() {
             screenOptions={({ route }) => ({
                 tabBarActiveTintColor: '#2E7D32',
                 tabBarInactiveTintColor: 'gray',
-                headerShown: true,
+                headerShown: false,
             })}>
             <Tab.Screen
                 name="PrayerTime"
                 component={PrayerTimeScreen}
                 options={{
-                    title: 'Jadwal Sholat',
-                    headerTitle: 'Jadwal Sholat',
+                    tabBarLabel: 'Prayers'
                 }}
             />
             <Tab.Screen
                 name="QiblaCompass"
                 component={QiblaCompassScreen}
                 options={{
-                    title: 'Kiblat',
-                    headerTitle: 'Arah Kiblat',
+                    tabBarLabel: 'Qibla'
                 }}
             />
             <Tab.Screen
                 name="Calendar"
                 component={CalendarScreen}
                 options={{
-                    title: 'Kalender',
-                    headerTitle: 'Kalender Islam',
+                    tabBarLabel: 'Calendar'
                 }}
             />
             <Tab.Screen
                 name="Quran"
                 component={QuranScreen}
                 options={{
-                    title: 'Al-Quran',
-                    headerTitle: 'Al-Quran',
+                    tabBarLabel: 'Quran'
                 }}
             />
         </Tab.Navigator>
