@@ -17,7 +17,7 @@ export const styles = StyleSheet.create({
     marginTop: 12,
   },
   headerGradient: {
-    padding: 20,
+    padding: 12,
     alignItems: 'center',
   },
   surahName: {
@@ -37,6 +37,7 @@ export const styles = StyleSheet.create({
   surahInfo: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 12,
     marginTop: 8,
   },

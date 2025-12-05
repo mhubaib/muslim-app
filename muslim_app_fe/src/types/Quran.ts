@@ -16,6 +16,7 @@ export interface Ayah {
   page?: number;
   textLatin?: string | null;
   textTranslation?: string | null;
+  audioUrl?: string;
 }
 
 export interface QuranApiResponse<T> {

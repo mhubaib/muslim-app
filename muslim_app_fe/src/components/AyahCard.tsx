@@ -9,6 +9,8 @@ interface AyahCardProps {
   onShare?: () => void;
   onPlay?: () => void;
   isBookmarked?: boolean;
+  currentAyahId?: number | null;
+  isPlaying?: boolean;
 }
 
 export default function AyahCard({
@@ -17,7 +19,11 @@ export default function AyahCard({
   onShare,
   onPlay,
   isBookmarked = false,
+  currentAyahId,
+  isPlaying,
 }: AyahCardProps) {
+  const isThisAyahPlaying = currentAyahId === ayah.id && isPlaying;
+
   return (
     <View style={styles.ayahCard}>
       <View style={styles.ayahHeader}>
@@ -27,7 +33,11 @@ export default function AyahCard({
         <View style={styles.ayahActions}>
           {onPlay && (
             <Pressable style={styles.actionButton} onPress={onPlay}>
-              <Ionicons name="play" size={18} color="#FFFFFF" />
+              <Ionicons
+                name={isThisAyahPlaying ? 'pause' : 'play'}
+                size={18}
+                color="#FFFFFF"
+              />
             </Pressable>
           )}
           {onBookmark && (

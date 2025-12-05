@@ -1,11 +1,11 @@
 import {
   View,
   Text,
-  ScrollView,
   ActivityIndicator,
   Pressable,
   Share,
   Alert,
+  FlatList,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../types/navigation';
@@ -17,6 +17,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import AyahCard from '../../components/AyahCard';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAudioPlayer } from '../../hooks/useAudioPlayer';
 
 type QuranDetailScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -34,6 +35,8 @@ export default function QuranDetailScreen({
   const [bookmarkedAyahs, setBookmarkedAyahs] = useState<Set<number>>(
     new Set(),
   );
+  const { playAyah, currentAyahId, isPlaying, pause, resume } =
+    useAudioPlayer();
 
   const fetchSurahDetail = useCallback(async () => {
     try {
@@ -110,25 +113,35 @@ export default function QuranDetailScreen({
     }
   };
 
-  const handlePlayAyah = (ayahNumber: number) => {
-    Alert.alert(
-      'Audio Player',
-      `Fitur audio untuk ayat ${ayahNumber} akan segera tersedia.`,
-    );
+  const handlePlayAyah = async (ayahId: number) => {
+    if (!surah) return;
+
+    const ayah = surah.ayahs.find(v => v.id === ayahId);
+    if (!ayah) return;
+
+    if (currentAyahId === ayahId && isPlaying) {
+      pause();
+      return;
+    }
+    
+    if (currentAyahId === ayahId && !isPlaying) {
+      resume();
+      return;
+    }
+
+    try {
+      await playAyah(
+        ayahId,
+        surah.englishName || surah.name,
+        ayah.numberInSurah,
+      );
+    } catch (err) {
+      Alert.alert('Error', 'Gagal memutar audio');
+      console.error('Error playing ayah:', err);
+    }
   };
 
-  if (loading) {
-    return (
-      <View style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#FFFFFF" />
-          <Text style={styles.loadingText}>Memuat surah...</Text>
-        </View>
-      </View>
-    );
-  }
-
-  if (error || !surah) {
+  if (error) {
     return (
       <View style={styles.container}>
         <View style={styles.errorContainer}>
@@ -144,7 +157,7 @@ export default function QuranDetailScreen({
     );
   }
 
-  const isMeccan = surah.revelationType?.toLowerCase() === 'Meccan';
+  const isMeccan = surah?.revelationType?.toLowerCase() === 'Meccan';
 
   return (
     <SafeAreaView style={styles.container}>
@@ -157,9 +170,9 @@ export default function QuranDetailScreen({
             end={{ x: 1, y: 1 }}
           >
             <Text style={styles.surahName}>
-              {surah.englishName || surah.name}
+              {surah?.englishName || surah?.name}
             </Text>
-            <Text style={styles.surahArabic}>{surah.name}</Text>
+            <Text style={styles.surahArabic}>{surah?.name}</Text>
 
             <View style={styles.surahInfo}>
               <View style={styles.surahInfoItem}>
@@ -180,7 +193,7 @@ export default function QuranDetailScreen({
                   color="rgba(255,255,255,0.9)"
                 />
                 <Text style={styles.surahInfoText}>
-                  {surah.numberOfAyahs} Ayat
+                  {surah?.numberOfAyahs} Ayat
                 </Text>
               </View>
               {getJuzRange() && (
@@ -206,34 +219,43 @@ export default function QuranDetailScreen({
           </LinearGradient>
         </View>
       </View>
-
-      <ScrollView
-        style={styles.scrollView}
+      <FlatList
+        data={surah?.ayahs}
+        keyExtractor={item => item.id.toString()}
         showsVerticalScrollIndicator={false}
+        style={styles.scrollView}
         contentContainerStyle={styles.contentContainer}
-      >
-        {surah.ayahs && surah.ayahs.length > 0 ? (
-          surah.ayahs.map(ayah => (
-            <AyahCard
-              key={ayah.id}
-              ayah={ayah}
-              onBookmark={() => handleBookmark(ayah.id)}
-              onShare={() => handleShare(ayah.id)}
-              onPlay={() => handlePlayAyah(ayah.id)}
-              isBookmarked={bookmarkedAyahs.has(ayah.id)}
-            />
-          ))
-        ) : (
-          <View style={styles.errorContainer}>
-            <Ionicons
-              name="document-outline"
-              size={64}
-              color="rgba(255,255,255,0.5)"
-            />
-            <Text style={styles.errorText}>Tidak ada ayat yang tersedia</Text>
-          </View>
+        renderItem={({ item }) => (
+          <AyahCard
+            ayah={item}
+            onBookmark={() => handleBookmark(item.id)}
+            onShare={() => handleShare(item.id)}
+            onPlay={() => handlePlayAyah(item.id)}
+            isBookmarked={bookmarkedAyahs.has(item.id)}
+            currentAyahId={currentAyahId}
+            isPlaying={isPlaying}
+          />
         )}
-      </ScrollView>
+        ListEmptyComponent={
+          loading ? (
+            <View style={styles.container}>
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#FFFFFF" />
+                <Text style={styles.loadingText}>Memuat surah...</Text>
+              </View>
+            </View>
+          ) : (
+            <View style={styles.errorContainer}>
+              <Ionicons
+                name="document-outline"
+                size={64}
+                color="rgba(255,255,255,0.5)"
+              />
+              <Text style={styles.errorText}>Tidak ada ayat yang tersedia</Text>
+            </View>
+          )
+        }
+      />
     </SafeAreaView>
   );
 }
