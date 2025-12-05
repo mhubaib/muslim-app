@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import PrayerTimeScreen from '../screens/prayer-time/PrayerTime';
 import QiblaCompassScreen from '../screens/QiblaCompass';
 import CalendarScreen from '../screens/Calendar';
-import QuranScreen from '../screens/Quran';
+import QuranScreen from '../screens/quran/Quran';
 import BottomTab from '../components/BottomTab';
 
 const Tab = createBottomTabNavigator();
