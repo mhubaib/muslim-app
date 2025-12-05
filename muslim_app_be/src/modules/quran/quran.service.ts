@@ -5,7 +5,6 @@ interface QuranApiSurah {
   number: number;
   name: string;
   englishName: string;
-  englishNameTransliteration?: string;
   numberOfAyahs: number;
   revelationType: 'Meccan' | 'Madinan';
   ayahs: QuranApiAyah[];

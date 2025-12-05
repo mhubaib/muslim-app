@@ -72,8 +72,6 @@ export default function QuranScreen({
     }
   };
 
-  console.log('Surahs:', surahs);
-
   const handleSurahPress = (surahId: number) => {
     navigation.navigate('QuranDetail', { surahId });
   };

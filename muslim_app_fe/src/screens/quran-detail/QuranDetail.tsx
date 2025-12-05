@@ -53,6 +53,8 @@ export default function QuranDetailScreen({
     fetchSurahDetail();
   }, [fetchSurahDetail]);
 
+  console.log(surah);
+
   useEffect(() => {
     if (surah) {
       navigation.setOptions({
@@ -124,7 +126,7 @@ export default function QuranDetailScreen({
     );
   }
 
-  const isMeccan = surah.revelationType?.toLowerCase() === 'meccan';
+  const isMeccan = surah.revelationType?.toLowerCase() === 'Meccan';
 
   return (
     <SafeAreaView style={styles.container}>
@@ -186,7 +188,7 @@ export default function QuranDetailScreen({
               ayah={ayah}
               onBookmark={() => handleBookmark(ayah.id)}
               onShare={() => handleShare(ayah.id)}
-              onPlay={() => handlePlayAyah(ayah.ayahNumber)}
+              onPlay={() => handlePlayAyah(ayah.id)}
               isBookmarked={bookmarkedAyahs.has(ayah.id)}
             />
           ))

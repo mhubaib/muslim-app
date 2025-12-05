@@ -9,9 +9,9 @@ export interface Surah {
 }
 
 export interface Ayah {
-  number: number;
+  id: number;
   textArabic: string;
-  numberInSurah: number;
+  ayahNumber: number;
   juz: number;
   page?: number;
   textLatin?: string | null;

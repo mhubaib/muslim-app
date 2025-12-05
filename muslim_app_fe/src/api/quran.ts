@@ -1,5 +1,5 @@
 import { AxiosError } from 'axios';
-import { Surah, QuranApiResponse, Ayah } from '../types/Quran';
+import { Surah, QuranApiResponse } from '../types/Quran';
 import { axiosInstance } from './axiosInstance';
 
 export const getAllSurahs = async (): Promise<Surah[]> => {
@@ -12,10 +12,10 @@ export const getAllSurahs = async (): Promise<Surah[]> => {
   }
 };
 
-export const getSurahById = async (id: number): Promise<Ayah[]> => {
+export const getSurahById = async (id: number): Promise<Surah> => {
   try {
-    const response = await axiosInstance.get<QuranApiResponse<Ayah[]>>(`/quran/surah/${id}`);
-    return response.data.data as Ayah[];
+    const response = await axiosInstance.get<QuranApiResponse<Surah>>(`/quran/surah/${id}`);
+    return response.data.data as Surah;
   } catch (error) {
     console.error('Error fetching surah:', error);
     throw new Error(error instanceof AxiosError ? error.response?.data.message : 'Failed to fetch surah');
