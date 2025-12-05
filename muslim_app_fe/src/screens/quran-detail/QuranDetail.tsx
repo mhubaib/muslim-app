@@ -84,7 +84,7 @@ export default function QuranDetailScreen({
     try {
       await Share.share({
         message: `${surah.englishName || surah.name} - Ayat ${
-          ayah.ayahNumber
+          ayah.numberInSurah
         }\n\n${ayah.textArabic}\n\n${ayah.textTranslation || ''}`,
       });
     } catch (shareError) {

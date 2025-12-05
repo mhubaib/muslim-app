@@ -81,7 +81,9 @@ export class QuranService {
                 textTranslation: translationAyah?.text || null,
               },
               create: {
-                ayahNumber: arabicAyah.numberInSurah,
+                numberInSurah: arabicAyah.numberInSurah,
+                page: arabicAyah.page,
+                juz: arabicAyah.juz,
                 surahId: surahData.number,
                 textArabic: arabicAyah.text,
                 textLatin: transliterationAyah?.text || null,

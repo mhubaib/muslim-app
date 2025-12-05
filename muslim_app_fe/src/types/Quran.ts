@@ -11,7 +11,7 @@ export interface Surah {
 export interface Ayah {
   id: number;
   textArabic: string;
-  ayahNumber: number;
+  numberInSurah: number;
   juz: number;
   page?: number;
   textLatin?: string | null;

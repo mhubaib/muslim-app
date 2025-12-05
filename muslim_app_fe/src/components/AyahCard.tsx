@@ -22,7 +22,7 @@ export default function AyahCard({
     <View style={styles.ayahCard}>
       <View style={styles.ayahHeader}>
         <View style={styles.ayahNumber}>
-          <Text style={styles.ayahNumberText}>{ayah.ayahNumber}</Text>
+          <Text style={styles.ayahNumberText}>{ayah.numberInSurah}</Text>
         </View>
         <View style={styles.ayahActions}>
           {onPlay && (
