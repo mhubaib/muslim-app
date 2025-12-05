@@ -21,8 +21,14 @@ import Ionicons from '@react-native-vector-icons/ionicons';
 import LinearGradient from 'react-native-linear-gradient';
 import PrayerCard from '../../components/PrayerCard';
 import { getLocationName } from '../../api/location';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { MainTabParamList } from '../../types/navigation';
 
-export default function PrayerTimeScreen() {
+export default function PrayerTimeScreen({
+  navigation,
+}: {
+  navigation: BottomTabNavigationProp<MainTabParamList, 'PrayerTime'>;
+}) {
   const [prayerTimes, setPrayerTimes] = useState<PrayerTimes | undefined>(
     undefined,
   );
@@ -33,7 +39,6 @@ export default function PrayerTimeScreen() {
     lon: number;
     city?: string;
   } | null>(null);
-  const [showSettings, setShowSettings] = useState(false);
   const [notifications, setNotifications] =
     useState<PrayerNotificationSettings>({
       fajr: true,
@@ -201,13 +206,9 @@ export default function PrayerTimeScreen() {
             </Pressable>
             <Pressable
               style={styles.settingsButton}
-              onPress={() => setShowSettings(!showSettings)}
+              onPress={() => navigation.navigate('Settings')}
             >
-              <Ionicons
-                name={showSettings ? 'close' : 'settings-outline'}
-                size={24}
-                color="#FFFFFF"
-              />
+              <Ionicons name={'settings-outline'} size={24} color="#FFFFFF" />
             </Pressable>
           </View>
         </View>

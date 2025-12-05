@@ -12,11 +12,11 @@ export default function MainTabNavigator() {
     return (
         <Tab.Navigator
             tabBar={(props) => <BottomTab {...props} />}
-            screenOptions={({ route }) => ({
+            screenOptions={{
                 tabBarActiveTintColor: '#2E7D32',
                 tabBarInactiveTintColor: 'gray',
                 headerShown: false,
-            })}>
+            }}>
             <Tab.Screen
                 name="PrayerTime"
                 component={PrayerTimeScreen}
