@@ -123,7 +123,7 @@ export class QuranService {
         where: { id },
         include: {
           ayahs: {
-            orderBy: { ayahNumber: 'asc' },
+            orderBy: { numberInSurah: 'asc' },
           },
         },
       });
@@ -139,12 +139,12 @@ export class QuranService {
     }
   }
 
-  async getAyah(surahId: number, ayahNumber: number) {
+  async getAyah(surahId: number, numberInSurah: number) {
     try {
       const ayah = await prisma.ayah.findFirst({
         where: {
           surahId,
-          ayahNumber,
+          numberInSurah,
         },
         include: {
           surah: true,

@@ -17,6 +17,7 @@ export default function SurahCard({
   englishName,
   revelationType,
   numberOfAyahs,
+  juz,
   onPress,
 }: SurahCardProps) {
   return (

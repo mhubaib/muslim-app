@@ -63,6 +63,24 @@ export default function QuranDetailScreen({
     }
   }, [surah, navigation]);
 
+  const getJuzRange = (): string => {
+    if (!surah || !surah.ayahs || surah.ayahs.length === 0) {
+      return '';
+    }
+
+    const firstAyah = surah.ayahs[0];
+    const lastAyah = surah.ayahs[surah.ayahs.length - 1];
+
+    const firstJuz = firstAyah.juz;
+    const lastJuz = lastAyah.juz;
+
+    if (firstJuz === lastJuz) {
+      return `Juz ${firstJuz}`;
+    } else {
+      return `Juz ${firstJuz} - ${lastJuz}`;
+    }
+  };
+
   const handleBookmark = (ayahId: number) => {
     setBookmarkedAyahs(prev => {
       const newSet = new Set(prev);
@@ -165,6 +183,19 @@ export default function QuranDetailScreen({
                   {surah.numberOfAyahs} Ayat
                 </Text>
               </View>
+              {getJuzRange() && (
+                <>
+                  <View style={styles.divider} />
+                  <View style={styles.surahInfoItem}>
+                    <Ionicons
+                      name="book-outline"
+                      size={16}
+                      color="rgba(255,255,255,0.9)"
+                    />
+                    <Text style={styles.surahInfoText}>{getJuzRange()}</Text>
+                  </View>
+                </>
+              )}
             </View>
 
             {surahId !== 1 && surahId !== 9 && (
