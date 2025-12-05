@@ -5,23 +5,24 @@ interface QuranApiSurah {
   number: number;
   name: string;
   englishName: string;
+  englishNameTransliteration?: string;
   numberOfAyahs: number;
-  revelationType: string;
-  ayahs?: QuranApiAyah[];
+  revelationType: 'Meccan' | 'Madinan';
+  ayahs: QuranApiAyah[];
 }
 
 interface QuranApiAyah {
   number: number;
   text: string;
   numberInSurah: number;
+  juz: number;
+  page?: number;
 }
 
-interface QuranApiResponse {
-  data: QuranApiSurah;
-}
-
-interface QuranApiAllSurahsResponse {
-  data: QuranApiSurah[];
+interface QuranApiResponse<T> {
+  code: number;
+  status: string;
+  data: T;
 }
 
 export class QuranService {
@@ -38,13 +39,21 @@ export class QuranService {
 
       console.log('Initializing Quran cache...');
 
-      // Fetch all surahs with their ayahs
       for (let i = 1; i <= 114; i++) {
-        const response = await httpGet<QuranApiResponse>(`${this.QURAN_API_BASE}/surah/${i}`);
+        const arabicResponse = await httpGet<QuranApiResponse<QuranApiSurah>>(
+          `${this.QURAN_API_BASE}/surah/${i}/quran-simple`
+        );
 
-        const surahData = response.data;
+        const transliterationResponse = await httpGet<QuranApiResponse<QuranApiSurah>>(
+          `${this.QURAN_API_BASE}/surah/${i}/en.transliteration`
+        );
 
-        // Create or update surah
+        const translationResponse = await httpGet<QuranApiResponse<QuranApiSurah>>(
+          `${this.QURAN_API_BASE}/surah/${i}/id.indonesian`
+        );
+
+        const surahData = arabicResponse.data;
+
         await prisma.surah.upsert({
           where: { id: surahData.number },
           update: {},
@@ -57,26 +66,35 @@ export class QuranService {
           },
         });
 
-        // Create ayahs
         if (surahData.ayahs) {
-          for (const ayah of surahData.ayahs) {
+          for (let j = 0; j < surahData.ayahs.length; j++) {
+            const arabicAyah = surahData.ayahs[j];
+            const transliterationAyah = transliterationResponse.data.ayahs?.[j];
+            const translationAyah = translationResponse.data.ayahs?.[j];
+
             await prisma.ayah.upsert({
               where: {
-                id: ayah.number,
+                id: arabicAyah.number,
               },
-              update: {},
+              update: {
+                textArabic: arabicAyah.text,
+                textLatin: transliterationAyah?.text || null,
+                textTranslation: translationAyah?.text || null,
+              },
               create: {
-                ayahNumber: ayah.numberInSurah,
+                ayahNumber: arabicAyah.numberInSurah,
                 surahId: surahData.number,
-                textArabic: ayah.text,
-                textLatin: null,
-                textTranslation: null,
+                textArabic: arabicAyah.text,
+                textLatin: transliterationAyah?.text || null,
+                textTranslation: translationAyah?.text || null,
               },
             });
           }
         }
 
         console.log(`Cached Surah ${i}/114: ${surahData.englishName}`);
+
+        await new Promise((resolve) => setTimeout(resolve, 100));
       }
 
       console.log('Quran cache initialization completed!');

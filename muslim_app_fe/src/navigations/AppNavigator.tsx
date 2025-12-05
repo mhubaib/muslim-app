@@ -6,7 +6,7 @@ import { ActivityIndicator, View } from 'react-native';
 import MainTabNavigator from './MainTabNavigator';
 
 import OnBoardingScreen from '../screens/OnBoarding';
-import QuranDetailScreen from '../screens/QuranDetail';
+import QuranDetailScreen from '../screens/quran-detail/QuranDetail';
 import SettingsScreen from '../screens/Settings';
 
 const AppStack = createNativeStackNavigator();
@@ -56,7 +56,7 @@ export default function AppNavigator() {
                         name="QuranDetail"
                         component={QuranDetailScreen}
                         options={{
-                            headerShown: true,
+                            headerShown: false,
                             title: 'Detail Surah',
                         }}
                     />

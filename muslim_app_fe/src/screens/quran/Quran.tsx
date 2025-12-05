@@ -44,11 +44,13 @@ export default function QuranScreen({
     } else {
       const filtered = surahs.filter(
         surah =>
-          surah.transliteration
-            .toLowerCase()
+          surah.englishName
+            ?.toLowerCase()
             .includes(searchQuery.toLowerCase()) ||
-          surah.translation.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          surah.name.includes(searchQuery) ||
+          surah.englishNameTransliteration
+            ?.toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          surah.name?.includes(searchQuery) ||
           surah.id.toString().includes(searchQuery),
       );
       setFilteredSurahs(filtered);
@@ -112,13 +114,6 @@ export default function QuranScreen({
           )}
         </View>
 
-        {loading && (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#FFFFFF" />
-            <Text style={styles.loadingText}>Memuat daftar surah...</Text>
-          </View>
-        )}
-
         {error && (
           <View style={styles.errorContainer}>
             <Ionicons name="alert-circle-outline" size={48} color="#FFCDD2" />
@@ -141,21 +136,28 @@ export default function QuranScreen({
               name={item.name}
               englishName={item.englishName}
               revelationType={item.revelationType}
-              numberOfAyahs={item.numberOfAyahs as number}
+              numberOfAyahs={item.numberOfAyahs}
               onPress={() => handleSurahPress(item.id)}
             />
           )}
           ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <Ionicons
-                name="search-outline"
-                size={48}
-                color="rgba(255,255,255,0.5)"
-              />
-              <Text style={styles.emptyText}>
-                Tidak ada surah yang ditemukan
-              </Text>
-            </View>
+            loading ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#FFFFFF" />
+                <Text style={styles.loadingText}>Memuat daftar surah...</Text>
+              </View>
+            ) : (
+              <View style={styles.emptyContainer}>
+                <Ionicons
+                  name="search-outline"
+                  size={48}
+                  color="rgba(255,255,255,0.5)"
+                />
+                <Text style={styles.emptyText}>
+                  Tidak ada surah yang ditemukan
+                </Text>
+              </View>
+            )
           }
         />
       </View>

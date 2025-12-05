@@ -2,20 +2,23 @@ export interface Surah {
   id: number;
   name: string;
   englishName: string;
+  englishNameTransliteration: string;
+  numberOfAyahs: number;
   revelationType: 'Meccan' | 'Medinan';
-  numberOfAyahs?: number;
+  ayahs: Ayah[];
 }
 
-// export interface Ayah {
-//   number: number;
-//   text: string;
-//   transliteration: string;
-//   translation: {
-//     id: string;
-//   };
-// }
+export interface Ayah {
+  number: number;
+  textArabic: string;
+  numberInSurah: number;
+  juz: number;
+  page?: number;
+  textLatin?: string | null;
+  textTranslation?: string | null;
+}
 
-export interface QuranApiResponse {
+export interface QuranApiResponse<T> {
   success: boolean;
-  data: Surah | Surah[];
+  data: T;
 }
