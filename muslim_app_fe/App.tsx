@@ -1,6 +1,6 @@
 /**
  * Muslim App - React Native Application
- * 
+ *
  * @format
  */
 
@@ -10,16 +10,19 @@ import { NavigationContainer } from '@react-navigation/native';
 
 // Import navigator
 import AppNavigator from './src/navigations/AppNavigator';
+import { SettingsProvider } from './src/context/SettingsContext';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
 
   return (
     <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <NavigationContainer>
-        <AppNavigator />
-      </NavigationContainer>
+      <SettingsProvider>
+        <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+        <NavigationContainer>
+          <AppNavigator />
+        </NavigationContainer>
+      </SettingsProvider>
     </SafeAreaProvider>
   );
 }

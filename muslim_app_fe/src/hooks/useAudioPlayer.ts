@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSettings } from '../context/SettingsContext';
 import {
   playAudio,
   pauseAudio,
@@ -10,15 +11,17 @@ import { getAyahAudioUrl } from '../utils/quranAudio';
 export const useAudioPlayer = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentAyahId, setCurrentAyahId] = useState<number | null>(null);
+  const { qari: globalQari } = useSettings();
 
   const playAyah = async (
     ayahId: number,
-    surahName: string,
-    ayahNumber: number,
-    qari: string = 'ar.alafasy',
+    _surahName: string,
+    _ayahNumber: number,
   ) => {
     try {
-      const audioUrl = getAyahAudioUrl(ayahId, qari);
+      const selectedQari = globalQari;
+      const audioUrl = getAyahAudioUrl(ayahId, selectedQari);
+      console.log('Playing Audio:', { ayahId, selectedQari, audioUrl });
 
       setCurrentAyahId(ayahId);
       setIsPlaying(true);
