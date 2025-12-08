@@ -42,7 +42,7 @@ export const AVAILABLE_QARIS = [
     name: 'Elmir Kuliev 2 by 1MuslimApp',
     bitrate: '64',
   },
-] as const;
+];
 
 export const getAyahAudioUrl = (
   ayahGlobalNumber: number,
