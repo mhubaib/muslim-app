@@ -1,8 +1,8 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import PrayerTimeScreen from '../screens/prayer-time/PrayerTime';
-import QiblaCompassScreen from '../screens/QiblaCompass';
-import CalendarScreen from '../screens/Calendar';
+import QiblaCompassScreen from '../screens/qibla/QiblaCompass';
+import CalendarScreen from '../screens/calendar/Calendar';
 import QuranScreen from '../screens/quran/Quran';
 import BottomTab from '../components/BottomTab';
 

@@ -5,7 +5,7 @@ import { ActivityIndicator, View } from 'react-native';
 
 import MainTabNavigator from './MainTabNavigator';
 
-import OnBoardingScreen from '../screens/OnBoarding';
+import OnBoardingScreen from '../screens/on-boarding/OnBoarding';
 import QuranDetailScreen from '../screens/quran-detail/QuranDetail';
 import SettingsScreen from '../screens/setting/Settings';
 
