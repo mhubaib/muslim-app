@@ -21,6 +21,13 @@ import {
   deleteScheduledNotification,
 } from './modules/notification/notification.controller.js';
 
+import {
+  registerDevice,
+  updateDevicePreferences,
+  getDeviceInfo,
+  unregisterDevice,
+} from './modules/device/device.controller.js';
+
 import { reverseGeocode } from './modules/location/location.controller.js';
 
 const app = express();
@@ -64,6 +71,11 @@ app.post('/notification/send', sendNotification);
 app.post('/notification/schedule', scheduleNotification);
 app.get('/notification/scheduled', getScheduledNotifications);
 app.delete('/notification/scheduled/:id', deleteScheduledNotification);
+
+app.post('/device/register', registerDevice);
+app.put('/device/:token/preferences', updateDevicePreferences);
+app.get('/device/:token', getDeviceInfo);
+app.delete('/device/:token', unregisterDevice);
 
 app.use((req, res) => {
   res.status(404).json({

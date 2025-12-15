@@ -38,6 +38,55 @@ export class NotificationService {
     }
   }
 
+  async sendToDevice(token: string, data: SendNotificationDto) {
+    try {
+      const message = {
+        notification: {
+          title: data.title,
+          body: data.body,
+        },
+        data: data.meta || {},
+        token: token,
+      };
+
+      const response = await admin.messaging().send(message);
+      console.log('Successfully sent message to device:', token, response);
+
+      return {
+        success: true,
+        messageId: response,
+      };
+    } catch (error) {
+      console.error('Error sending notification to device:', error);
+      throw error;
+    }
+  }
+
+  async sendToMultipleDevices(tokens: string[], data: SendNotificationDto) {
+    try {
+      const message = {
+        notification: {
+          title: data.title,
+          body: data.body,
+        },
+        data: data.meta || {},
+        tokens: tokens,
+      };
+
+      const response = await admin.messaging().sendEachForMulticast(message);
+      console.log(`Successfully sent ${response.successCount} messages`);
+
+      return {
+        success: true,
+        successCount: response.successCount,
+        failureCount: response.failureCount,
+      };
+    } catch (error) {
+      console.error('Error sending notifications to devices:', error);
+      throw error;
+    }
+  }
+
   async scheduleNotification(data: ScheduleNotificationDto) {
     try {
       const notification = await prisma.notificationSchedule.create({

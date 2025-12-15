@@ -11,7 +11,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model PrayerCache {
@@ -27,6 +26,33 @@ model PrayerCache {
   updatedAt   DateTime @updatedAt
 }
 
+model DeviceToken {
+  id          Int      @id @default(autoincrement())
+  token       String   @unique
+  deviceId    String?
+  platform    String?  // 'android' or 'ios'
+  
+  // Location for prayer time notifications
+  latitude    Float?
+  longitude   Float?
+  timezone    String?
+  
+  // Notification preferences
+  enablePrayerNotifications Boolean @default(true)
+  enableEventNotifications  Boolean @default(true)
+  
+  // Prayer notification settings (minutes before prayer time)
+  notifyBeforePrayer Int @default(5)
+  
+  lastActiveAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  notifications NotificationSchedule[]
+  
+  @@index([token])
+}
+
 model NotificationSchedule {
   id          Int      @id @default(autoincrement())
   type        NotificationType
@@ -34,9 +60,20 @@ model NotificationSchedule {
   body        String
   scheduleAt  DateTime
   meta        Json?
+  
+  // Optional: for device-specific notifications
+  deviceTokenId Int?
+  deviceToken   DeviceToken? @relation(fields: [deviceTokenId], references: [id], onDelete: Cascade)
+  
+  // For tracking sent status
+  sent        Boolean @default(false)
+  sentAt      DateTime?
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  
+  @@index([scheduleAt, sent])
+  @@index([deviceTokenId])
 }
 
 model IslamicEvent {

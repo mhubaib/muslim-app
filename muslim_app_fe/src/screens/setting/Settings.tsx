@@ -4,9 +4,19 @@ import { AVAILABLE_QARIS } from '../../utils/quranAudio';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styles } from './settings-styles';
 import { Dropdown } from 'react-native-element-dropdown';
+import messaging from '@react-native-firebase/messaging';
+import { useState } from 'react';
 
 export default function SettingsScreen() {
+  const [token, setToken] = useState('');
   const { qari, setQari } = useSettings();
+
+  const getToken = async () => {
+    const token = await messaging().getToken();
+    setToken(token);
+  };
+
+  getToken();
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
@@ -35,6 +45,7 @@ export default function SettingsScreen() {
           }}
         />
       </View>
+      <Text>{token}</Text>
     </SafeAreaView>
   );
 }

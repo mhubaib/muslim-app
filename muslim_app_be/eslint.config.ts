@@ -28,6 +28,7 @@ export default [
         'error',
         {
           semi: true,
+          singleQuote: true,
         },
       ],
     },
