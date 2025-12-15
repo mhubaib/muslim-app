@@ -25,6 +25,7 @@
     "react": "19.1.1",
     "react-native": "0.82.1",
     "react-native-calendars": "^1.1313.0",
+    "react-native-compass-heading": "^2.0.2",
     "react-native-element-dropdown": "^2.12.4",
     "react-native-gesture-handler": "^2.29.1",
     "react-native-linear-gradient": "^2.8.3",
