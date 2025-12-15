@@ -61,7 +61,10 @@ export const styles = StyleSheet.create({
     lineHeight: 20,
   },
   emptyState: {
+    flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
     padding: 40,
   },
   emptyStateText: {
@@ -71,7 +74,10 @@ export const styles = StyleSheet.create({
   },
   empty: {
     height: 100,
-  }
+  },
+  loader: {
+    marginTop: 20,
+  },
 });
 
 export const calendarTheme = {

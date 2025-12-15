@@ -1,15 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator } from 'react-native';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import { styles, calendarTheme } from './calendar-style';
-import {
-  toHijri,
-  getIslamicMonthName,
-  getUpcomingEvents,
-  HijriDate,
-} from '../../utils/hijri';
+import { toHijri, getIslamicMonthName, HijriDate } from '../../utils/hijri';
+import { getAllEvents } from '../../api/event';
+import { IslamicEvent } from '../../types/Event';
 
 LocaleConfig.locales.id = {
   monthNames: [
@@ -51,26 +48,72 @@ export default function CalendarScreen() {
     new Date().toISOString().split('T')[0],
   );
   const [hijriDate, setHijriDate] = useState<HijriDate | null>(null);
+  const [events, setEvents] = useState<IslamicEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
 
   useEffect(() => {
     const date = new Date(selectedDate);
     setHijriDate(toHijri(date));
   }, [selectedDate]);
 
+  const fetchEvents = async () => {
+    try {
+      setLoading(true);
+      const data = await getAllEvents();
+      setEvents(data);
+    } catch (error) {
+      console.error('Failed to fetch events:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const markedDates = useMemo(() => {
-    return {
+    const marks: any = {
       [selectedDate]: {
         selected: true,
         selectedColor: '#14be86',
         selectedTextColor: 'white',
       },
     };
-  }, [selectedDate]);
 
-  const upcomingEvents = useMemo(() => {
-    if (!hijriDate) return [];
-    return getUpcomingEvents(hijriDate, 10);
-  }, [hijriDate]);
+    events.forEach(event => {
+      if (event.estimatedGregorian) {
+        const dateStr = new Date(event.estimatedGregorian)
+          .toISOString()
+          .split('T')[0];
+
+        // Don't overwrite selected date style, just add dot if it's selected
+        if (marks[dateStr]) {
+          marks[dateStr].marked = true;
+          marks[dateStr].dotColor = marks[dateStr].selected
+            ? 'white'
+            : '#14be86';
+        } else {
+          marks[dateStr] = {
+            marked: true,
+            dotColor: '#14be86',
+          };
+        }
+      }
+    });
+
+    return marks;
+  }, [selectedDate, events]);
+
+  const selectedDateEvents = useMemo(() => {
+    return events.filter(event => {
+      if (!event.estimatedGregorian) return false;
+      const eventDate = new Date(event.estimatedGregorian)
+        .toISOString()
+        .split('T')[0];
+      return eventDate === selectedDate;
+    });
+  }, [selectedDate, events]);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -103,25 +146,32 @@ export default function CalendarScreen() {
       />
 
       <ScrollView contentContainerStyle={styles.calendarContainer}>
-        <Text style={styles.sectionTitle}>
-          Events Islam
-        </Text>
+        <Text style={styles.sectionTitle}>Events Islam</Text>
 
         <View style={styles.eventList}>
-          {upcomingEvents.map((event, index) => (
-            <View key={index} style={styles.eventItem}>
-              <Text style={styles.eventTitle}>{event.title}</Text>
-              <Text style={styles.eventDate}>
-                {event.day} {getIslamicMonthName(event.month)} {event.year} H
-              </Text>
-              <Text style={styles.eventDescription}>{event.description}</Text>
-            </View>
-          ))}
-
-          {upcomingEvents.length === 0 && (
+          {loading ? (
+            <ActivityIndicator
+              size="small"
+              color="#14be86"
+              style={styles.loader}
+            />
+          ) : selectedDateEvents.length > 0 ? (
+            selectedDateEvents.map((event, index) => (
+              <View key={index} style={styles.eventItem}>
+                <Text style={styles.eventTitle}>{event.name}</Text>
+                <Text style={styles.eventDate}>{event.dateHijri}</Text>
+                {event.description && (
+                  <Text style={styles.eventDescription}>
+                    {event.description}
+                  </Text>
+                )}
+              </View>
+            ))
+          ) : (
             <View style={styles.emptyState}>
+              <Ionicons name="archive-outline" size={50} color="#14be86" />
               <Text style={styles.emptyStateText}>
-                Tidak ada event dalam waktu dekat
+                Tidak ada event pada tanggal ini
               </Text>
             </View>
           )}
