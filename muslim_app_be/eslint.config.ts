@@ -27,7 +27,6 @@ export default [
       'prettier/prettier': [
         'error',
         {
-          singleQuote: true,
           semi: true,
         },
       ],

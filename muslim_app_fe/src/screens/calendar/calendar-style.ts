@@ -69,6 +69,9 @@ export const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 10,
   },
+  empty: {
+    height: 100,
+  }
 });
 
 export const calendarTheme = {

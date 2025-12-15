@@ -11,7 +11,6 @@ import {
   HijriDate,
 } from '../../utils/hijri';
 
-// Configure Indonesian Locale
 LocaleConfig.locales.id = {
   monthNames: [
     'Januari',
@@ -62,7 +61,7 @@ export default function CalendarScreen() {
     return {
       [selectedDate]: {
         selected: true,
-        selectedColor: '#4CAF50',
+        selectedColor: '#14be86',
         selectedTextColor: 'white',
       },
     };
@@ -75,6 +74,16 @@ export default function CalendarScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>
+          {hijriDate
+            ? `${hijriDate.day} ${getIslamicMonthName(hijriDate.month)} ${
+                hijriDate.year
+              } H`
+            : 'Memuat...'}
+        </Text>
+      </View>
+
       <Calendar
         current={selectedDate}
         onDayPress={(day: { dateString: string }) => {
@@ -90,22 +99,12 @@ export default function CalendarScreen() {
             color="white"
           />
         )}
+        enableSwipeMonths
       />
-
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>
-          {hijriDate
-            ? `${hijriDate.day} ${getIslamicMonthName(hijriDate.month)} ${
-                hijriDate.year
-              } H`
-            : 'Memuat...'}
-        </Text>
-        <Text style={styles.headerSubtitle}>Tanggal Hijriah Terpilih</Text>
-      </View>
 
       <ScrollView contentContainerStyle={styles.calendarContainer}>
         <Text style={styles.sectionTitle}>
-          Moment Penting Islam (Mendatang)
+          Events Islam
         </Text>
 
         <View style={styles.eventList}>
@@ -127,6 +126,7 @@ export default function CalendarScreen() {
             </View>
           )}
         </View>
+        <View style={styles.emptyState} />
       </ScrollView>
     </SafeAreaView>
   );
