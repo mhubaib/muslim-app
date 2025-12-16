@@ -46,6 +46,7 @@ export const updateDevicePreferences = async (req: Request, res: Response) => {
       latitude,
       longitude,
       timezone,
+      enabledPrayers,
     } = req.body;
 
     const device = await deviceTokenService.updatePreferences(token, {
@@ -55,6 +56,7 @@ export const updateDevicePreferences = async (req: Request, res: Response) => {
       latitude,
       longitude,
       timezone,
+      enabledPrayers,
     });
 
     res.status(200).json({
