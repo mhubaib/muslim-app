@@ -8,6 +8,7 @@ import { styles } from './notification-settings-styles';
 import { getCurrentLocation } from '../../utils/getCoordinates';
 
 const notifyBeforeOptions = [
+  { label: '1 menit sebelum', value: 1 },
   { label: '5 menit sebelum', value: 5 },
   { label: '10 menit sebelum', value: 10 },
   { label: '15 menit sebelum', value: 15 },

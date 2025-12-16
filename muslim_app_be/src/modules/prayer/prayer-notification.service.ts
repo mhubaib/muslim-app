@@ -98,6 +98,14 @@ export class PrayerNotificationService {
           prayerDateTime.getTime() - notifyBeforeMinutes * 60 * 1000
         );
 
+        console.log(`Debug Scheduling ${prayer.name}:
+          Prayer Time: ${prayer.time} -> ${prayerDateTime.toLocaleTimeString()}
+          Notify Before: ${notifyBeforeMinutes} mins
+          Notification Time: ${notificationTime.toLocaleTimeString()}
+          Current Time: ${now.toLocaleTimeString()}
+          Is Future: ${notificationTime > now}
+        `);
+
         // Only schedule if the time hasn't passed
         if (notificationTime > now) {
           await prisma.notificationSchedule.create({
@@ -114,7 +122,10 @@ export class PrayerNotificationService {
               },
             },
           });
+          console.log(`✅ Scheduled ${prayer.name} for ${notificationTime.toLocaleTimeString()}`);
           scheduled++;
+        } else {
+          console.log(`❌ Skipped ${prayer.name} because time has passed`);
         }
       }
 
