@@ -1,4 +1,9 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  FC,
+} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface NotificationSettings {
@@ -21,6 +26,7 @@ interface NotificationContextType {
     prayer: keyof NotificationSettings['enabledPrayers'],
   ) => Promise<void>;
   isInitialized: boolean;
+  loadSettings: () => Promise<void>;
 }
 
 const defaultSettings: NotificationSettings = {
@@ -42,17 +48,12 @@ const NotificationContext = createContext<NotificationContextType | undefined>(
 
 const STORAGE_KEY = '@notification_settings';
 
-export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
+export const NotificationProvider: FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [settings, setSettings] =
     useState<NotificationSettings>(defaultSettings);
   const [isInitialized, setIsInitialized] = useState(false);
-
-  // Load settings from AsyncStorage
-  useEffect(() => {
-    loadSettings();
-  }, []);
 
   const loadSettings = async () => {
     try {
@@ -97,7 +98,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <NotificationContext.Provider
-      value={{ settings, updateSettings, togglePrayer, isInitialized }}
+      value={{ settings, updateSettings, togglePrayer, isInitialized, loadSettings }}
     >
       {children}
     </NotificationContext.Provider>

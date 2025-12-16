@@ -36,7 +36,8 @@ export class PrayerNotificationService {
             device.token,
             device.latitude!,
             device.longitude!,
-            device.notifyBeforePrayer
+            device.notifyBeforePrayer,
+            device.enabledPrayers as any // Pass enabledPrayers
           );
           totalScheduled += scheduled;
         } catch (error) {
@@ -62,24 +63,31 @@ export class PrayerNotificationService {
     deviceToken: string,
     latitude: number,
     longitude: number,
-    notifyBeforeMinutes: number = 5
+    notifyBeforeMinutes: number = 5,
+    enabledPrayers?: any
   ) {
     try {
       // Get today's prayer times
       const prayerTimes = await this.prayerService.getTodayPrayerTimes(latitude, longitude);
 
       const prayers = [
-        { name: 'Fajr', time: prayerTimes.fajr, emoji: '🌅' },
-        { name: 'Dhuhr', time: prayerTimes.dhuhr, emoji: '☀️' },
-        { name: 'Asr', time: prayerTimes.asr, emoji: '🌤️' },
-        { name: 'Maghrib', time: prayerTimes.maghrib, emoji: '🌆' },
-        { name: 'Isha', time: prayerTimes.isha, emoji: '🌙' },
+        { name: 'Fajr', time: prayerTimes.fajr, emoji: '🌅', key: 'fajr' },
+        { name: 'Dhuhr', time: prayerTimes.dhuhr, emoji: '☀️', key: 'dhuhr' },
+        { name: 'Asr', time: prayerTimes.asr, emoji: '🌤️', key: 'asr' },
+        { name: 'Maghrib', time: prayerTimes.maghrib, emoji: '🌆', key: 'maghrib' },
+        { name: 'Isha', time: prayerTimes.isha, emoji: '🌙', key: 'isha' },
       ];
 
       let scheduled = 0;
       const now = new Date();
 
       for (const prayer of prayers) {
+        // Check if this prayer is enabled
+        if (enabledPrayers && enabledPrayers[prayer.key] === false) {
+          console.log(`⏭️  Skipping ${prayer.name} - disabled by user`);
+          continue;
+        }
+
         // Parse prayer time (format: "HH:MM")
         const [hours, minutes] = prayer.time.split(':').map(Number);
         const prayerDateTime = new Date();

@@ -16,6 +16,13 @@ interface UpdateDevicePreferencesDto {
   latitude?: number;
   longitude?: number;
   timezone?: string;
+  enabledPrayers?: {
+    fajr?: boolean;
+    dhuhr?: boolean;
+    asr?: boolean;
+    maghrib?: boolean;
+    isha?: boolean;
+  };
 }
 
 export class DeviceTokenService {

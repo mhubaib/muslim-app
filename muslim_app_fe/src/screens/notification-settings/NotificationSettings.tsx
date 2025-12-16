@@ -120,9 +120,29 @@ export default function NotificationSettingsScreen() {
                         key as keyof typeof settings.enabledPrayers
                       ]
                     }
-                    onValueChange={() =>
-                      togglePrayer(key as keyof typeof settings.enabledPrayers)
-                    }
+                    onValueChange={async () => {
+                      await togglePrayer(
+                        key as keyof typeof settings.enabledPrayers,
+                      );
+
+                      // Sync to backend
+                      try {
+                        const location = await getCurrentLocation();
+                        await FCMService.updatePreferences({
+                          latitude: location.latitude,
+                          longitude: location.longitude,
+                          enabledPrayers: {
+                            ...settings.enabledPrayers,
+                            [key]:
+                              !settings.enabledPrayers[
+                                key as keyof typeof settings.enabledPrayers
+                              ],
+                          },
+                        });
+                      } catch (error) {
+                        console.error('Error syncing prayer toggle:', error);
+                      }
+                    }}
                     trackColor={{ false: '#767577', true: '#14be86' }}
                     thumbColor={
                       settings.enabledPrayers[

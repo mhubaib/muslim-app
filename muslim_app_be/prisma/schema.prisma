@@ -11,6 +11,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model PrayerCache {
@@ -43,6 +44,9 @@ model DeviceToken {
   
   // Prayer notification settings (minutes before prayer time)
   notifyBeforePrayer Int @default(5)
+  
+  // Per-prayer preferences (which prayers to notify)
+  enabledPrayers Json? @default("{\"fajr\":true,\"dhuhr\":true,\"asr\":true,\"maghrib\":true,\"isha\":true}")
   
   lastActiveAt DateTime @default(now())
   createdAt   DateTime @default(now())

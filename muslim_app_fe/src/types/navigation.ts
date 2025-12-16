@@ -3,7 +3,6 @@ export type RootStackParamList = {
   MainTabs: undefined;
   QuranDetail: {
     surahId: number;
-    surahName?: string;
   };
   Settings: undefined;
 };

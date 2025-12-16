@@ -93,6 +93,13 @@ export class FCMService {
     notifyBeforePrayer?: number;
     latitude?: number;
     longitude?: number;
+    enabledPrayers?: {
+      fajr?: boolean;
+      dhuhr?: boolean;
+      asr?: boolean;
+      maghrib?: boolean;
+      isha?: boolean;
+    };
   }): Promise<boolean> {
     try {
       const token = await this.getToken();
@@ -151,9 +158,6 @@ export class FCMService {
           pressAction: {
             id: 'default',
           },
-        },
-        ios: {
-          sound: 'default',
         },
       });
     });

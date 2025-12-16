@@ -9,6 +9,7 @@ import OnBoardingScreen from '../screens/on-boarding/OnBoarding';
 import QuranDetailScreen from '../screens/quran-detail/QuranDetail';
 import SettingsScreen from '../screens/setting/Settings';
 import NotificationSettingsScreen from '../screens/notification-settings/NotificationSettings';
+import { useNotificationSettings } from '../contexts/NotificationContext';
 
 const AppStack = createNativeStackNavigator();
 
@@ -16,9 +17,7 @@ export default function AppNavigator() {
   const [isLoading, setIsLoading] = useState(true);
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
 
-  useEffect(() => {
-    checkOnboardingStatus();
-  }, []);
+  const { loadSettings } = useNotificationSettings();
 
   const checkOnboardingStatus = async () => {
     try {
@@ -34,6 +33,11 @@ export default function AppNavigator() {
   const handleOnboardingComplete = () => {
     setHasCompletedOnboarding(true);
   };
+
+  useEffect(() => {
+    checkOnboardingStatus();
+    loadSettings();
+  }, []);
 
   if (isLoading) {
     return (

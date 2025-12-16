@@ -11,9 +11,7 @@ import {
   getCurrentLocation,
   requestLocationPermission,
 } from '../../utils/getCoordinates';
-import {
-  PrayerTimes,
-} from '../../types/PrayerTimes';
+import { PrayerTimes } from '../../types/PrayerTimes';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styles } from './prayer-style';
 import Ionicons from '@react-native-vector-icons/ionicons';
@@ -183,11 +181,15 @@ export default function PrayerTimeScreen({
       // Toggle di local state (NotificationContext)
       await togglePrayer(prayer);
 
-      // Sync ke backend
+      // Sync ke backend dengan enabledPrayers
       if (location) {
         await FCMService.updatePreferences({
           latitude: location.lat,
           longitude: location.lon,
+          enabledPrayers: {
+            ...settings.enabledPrayers,
+            [prayer]: !settings.enabledPrayers[prayer], // Toggle the specific prayer
+          },
         });
       }
 
