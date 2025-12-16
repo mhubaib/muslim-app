@@ -8,6 +8,7 @@ import MainTabNavigator from './MainTabNavigator';
 import OnBoardingScreen from '../screens/on-boarding/OnBoarding';
 import QuranDetailScreen from '../screens/quran-detail/QuranDetail';
 import SettingsScreen from '../screens/setting/Settings';
+import NotificationSettingsScreen from '../screens/notification-settings/NotificationSettings';
 
 const AppStack = createNativeStackNavigator();
 
@@ -72,6 +73,22 @@ export default function AppNavigator() {
             options={{
               headerShown: true,
               title: 'Pengaturan',
+              headerStyle: {
+                backgroundColor: '#20493bff',
+              },
+              headerTintColor: '#FFFFFF',
+            }}
+          />
+          <AppStack.Screen
+            name="NotificationSettings"
+            component={NotificationSettingsScreen}
+            options={{
+              headerShown: true,
+              title: 'Pengaturan Notifikasi',
+              headerStyle: {
+                backgroundColor: '#20493bff',
+              },
+              headerTintColor: '#FFFFFF',
             }}
           />
         </>

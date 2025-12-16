@@ -12,7 +12,6 @@ import {
   requestLocationPermission,
 } from '../../utils/getCoordinates';
 import {
-  PrayerNotificationSettings,
   PrayerTimes,
 } from '../../types/PrayerTimes';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -23,6 +22,8 @@ import PrayerCard from '../../components/PrayerCard';
 import { getLocationName } from '../../api/location';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { MainTabParamList } from '../../types/navigation';
+import { useNotificationSettings } from '../../contexts/NotificationContext';
+import { FCMService } from '../../services/fcm.service';
 
 export default function PrayerTimeScreen({
   navigation,
@@ -39,15 +40,9 @@ export default function PrayerTimeScreen({
     lon: number;
     city?: string;
   } | null>(null);
-  const [notifications, setNotifications] =
-    useState<PrayerNotificationSettings>({
-      fajr: true,
-      dhuhr: true,
-      asr: true,
-      maghrib: true,
-      isha: true,
-    });
   const [countdown, setCountdown] = useState<string>('00:00:00');
+
+  const { settings, togglePrayer } = useNotificationSettings();
 
   useEffect(() => {
     initializeScreen();
@@ -181,11 +176,25 @@ export default function PrayerTimeScreen({
     return { next };
   };
 
-  const toggleNotification = (prayer: keyof PrayerNotificationSettings) => {
-    setNotifications(prev => ({
-      ...prev,
-      [prayer]: !prev[prayer],
-    }));
+  const toggleNotification = async (
+    prayer: keyof typeof settings.enabledPrayers,
+  ) => {
+    try {
+      // Toggle di local state (NotificationContext)
+      await togglePrayer(prayer);
+
+      // Sync ke backend
+      if (location) {
+        await FCMService.updatePreferences({
+          latitude: location.lat,
+          longitude: location.lon,
+        });
+      }
+
+      console.log(`Notification for ${prayer} toggled successfully`);
+    } catch (err) {
+      console.error('Error toggling notification:', err);
+    }
   };
 
   const { next } = getCurrentNextPrayer();
@@ -258,7 +267,7 @@ export default function PrayerTimeScreen({
                 time={prayerTimes.fajr}
                 icon="sunny"
                 isNext={next?.key === 'fajr'}
-                notificationEnabled={notifications.fajr}
+                notificationEnabled={settings.enabledPrayers.fajr}
                 onToggleNotification={() => toggleNotification('fajr')}
               />
               <PrayerCard
@@ -266,7 +275,7 @@ export default function PrayerTimeScreen({
                 time={prayerTimes.dhuhr}
                 icon="partly-sunny"
                 isNext={next?.key === 'dhuhr'}
-                notificationEnabled={notifications.dhuhr}
+                notificationEnabled={settings.enabledPrayers.dhuhr}
                 onToggleNotification={() => toggleNotification('dhuhr')}
               />
               <PrayerCard
@@ -274,7 +283,7 @@ export default function PrayerTimeScreen({
                 time={prayerTimes.asr}
                 icon="cloudy"
                 isNext={next?.key === 'asr'}
-                notificationEnabled={notifications.asr}
+                notificationEnabled={settings.enabledPrayers.asr}
                 onToggleNotification={() => toggleNotification('asr')}
               />
               <PrayerCard
@@ -282,7 +291,7 @@ export default function PrayerTimeScreen({
                 time={prayerTimes.maghrib}
                 icon="moon"
                 isNext={next?.key === 'maghrib'}
-                notificationEnabled={notifications.maghrib}
+                notificationEnabled={settings.enabledPrayers.maghrib}
                 onToggleNotification={() => toggleNotification('maghrib')}
               />
               <PrayerCard
@@ -290,7 +299,7 @@ export default function PrayerTimeScreen({
                 time={prayerTimes.isha}
                 icon="star"
                 isNext={next?.key === 'isha'}
-                notificationEnabled={notifications.isha}
+                notificationEnabled={settings.enabledPrayers.isha}
                 onToggleNotification={() => toggleNotification('isha')}
               />
             </>
