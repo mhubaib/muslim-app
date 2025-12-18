@@ -77,3 +77,5 @@ yarn-error.log
 android/app/google-services.json
 
 src/api/axiosInstance.ts
+
+android/app/muslim-app-upload-key.keystore
